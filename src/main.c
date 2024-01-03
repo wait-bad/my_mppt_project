@@ -52,6 +52,7 @@ int32_t constant            = 10000;//constant = 0.0001;
 uint16_t set_Reload_value   = 1399; //  freq = 150k
 uint16_t set_duty_max_value = 1299;    
 uint16_t set_duty_min_value = 0;
+float mppt_set_voltage      = 0;
 
 // un_ctrl_parameter
 uint32_t set_duty_voltage = 0;
@@ -62,8 +63,9 @@ uint32_t set_duty_max     = 0;
 uint32_t set_duty_min     = 0;
 double really_duty      = 0;
 uint16_t now_current      = 0;
-uint16_t helf_sec_flag   = 0;
+uint16_t half_sec_flag   = 0;
 uint16_t current_data[70];
+uint16_t real_current_data;
 
 // flag
 uint16_t tim_add_counter = 0;
@@ -82,6 +84,8 @@ static void adc_gpio_config(void);
 void MPPT_PerturbObserve(void);
 void UpdateControlOptimized();
 void catch_current_data();
+void printf_data_used();
+void welcomeMessage();
 /**************************************/
 
 uint16_t prescaler_value = 0;
@@ -256,21 +260,29 @@ void system_init(void)
   */
 int main(void)
 {
+
   system_init();
   tmr_channel_value_set(TMR3, TMR_SELECT_CHANNEL_1, 1);
   set_current=10;
   set_voltage=50;
+  mppt_set_voltage = set_voltage;
   count_un_ctrl_parameter();
-  printf("usart printf example: retarget the c library printf function to the usart\r\n");
-  
+  welcomeMessage();
   /***********************/
     adc_ordinary_software_trigger_enable(ADC1, TRUE);
   /***********************/
   while(1)
   {
-    if (helf_sec_flag != 0)
+    if (half_sec_flag != 0)
     {
-      QuickSort(current_data,0,70);
+      half_sec_flag = 0;
+      ProcessCurrentData(current_data,70);
+      MPPT_PerturbObserve();
+
+
+
+
+      printf_data_used();
 
     }
     
@@ -303,39 +315,46 @@ int main(void)
  */
 void MPPT_PerturbObserve(void) {
     static double perturbAmount = 0.1;  // 扰动幅度，根据实际情况调整
-
-    // 计算电压和电流的实际值
-    double voltage = ad_value[0] * voltage_cailbration;
-    double current = ad_value[1] * current_cailbration;
+    half_sec_flag = 0;
+    //计算电压和电流的实际值
+    double voltage = ad_value[0]*voltage_cailbration;
+    double current = real_current_data * current_cailbration;
 
     // 计算功率
     double power = voltage * current;
 
     // 扰动电压
-    double perturbedVoltage = voltage + perturbAmount;
-
+    double mppt_set_voltage = voltage - perturbAmount;
+    count_un_ctrl_parameter();
+    // 等待参数
+    while (half_sec_flag == 0);
+    half_sec_flag = 0;
+    real_current_data = ProcessCurrentData(current_data,70);
     // 计算扰动后的功率
-    double perturbedPower = perturbedVoltage * current;
-
+    voltage = ad_value[0]*voltage_cailbration;
+    current = real_current_data * current_cailbration;
+    double perturbedPower = voltage * current;
     // 比较扰动前后的功率
     if (perturbedPower > power) {
-        // 如果功率增加，则增大电压扰动
-        set_duty_voltage += perturbAmount;  // 根据实际情况调整增加的电压扰动
-    } else {
-        // 如果功率减小，则减小电压扰动
-        set_duty_voltage -= perturbAmount;  // 根据实际情况调整减小的电压扰动
+        // 如果功率增加，减小电压扰动
+        set_duty_voltage -= 0.05;  // 根据实际情况调整减小的电压扰动 
+    } 
+    else {
+        // 如果功率减小，增大电压扰动
+        set_duty_voltage += 0.15;  // 根据实际情况调整增加的电压扰动
     }
-
     // 限制电压扰动范围
-    if (set_duty_voltage > set_duty_max) {
-        set_duty_voltage = set_duty_max;
-    } else if (set_duty_voltage < set_duty_min) {
-        set_duty_voltage = set_duty_min;
+    if (mppt_set_voltage > set_voltage)
+    {
+      mppt_set_voltage = set_voltage;
     }
-
+    if (mppt_set_voltage < 0)
+    {
+      mppt_set_voltage = 0;
+    }
+    count_un_ctrl_parameter();
     // 更新电压扰动到 PWM 输出
-    voltage_duty += set_duty_voltage;
-    tmr_channel_value_set(TMR3, TMR_SELECT_CHANNEL_1, voltage_duty / constant);
+
 }
 
 
@@ -385,6 +404,28 @@ void catch_current_data()
     if (time_cnt == 1400)
     {
       time_cnt = 0;
-      helf_sec_flag = 1;
+      half_sec_flag = 1;
     }
+}
+
+void printf_data_used(){
+    float really_duty = 0;
+    //printf("usart printf counter: %u\r\n",time_cnt++);
+    printf("voltage value = %.3fV\r\n", ad_value[0]*voltage_cailbration);
+    printf("now_current value = %dA\r\n", now_current);
+    printf("mean_current value = %dA\r\n", ad_value[1]);
+    printf("mean_current  = %.3fA\r\n", ad_value[1]*current_cailbration);
+    printf("power   value = %.3fW\r\n", ad_value[0]*voltage_cailbration*ad_value[1]*current_cailbration);
+    printf("reload  value  = %d\r\n", currten_duty/constant);
+    really_duty = (currten_duty/constant);
+    printf("duty____value = %.3f%%\r\n", really_duty/set_Reload_value*100);
+}
+
+
+void welcomeMessage() {
+    printf("Welcome to the MPPT Controller System\n");
+    printf("Date: 2024-01-04\n");
+    printf("Functionality: Maximum Power Point Tracking (MPPT)\n");
+    printf("Designed by: Wang\n");
+    printf("Enjoy optimizing your power generation!\n");
 }

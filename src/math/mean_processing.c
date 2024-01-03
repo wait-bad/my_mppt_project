@@ -61,21 +61,10 @@ uint16_t CalculateAverage(uint16_t arr[], int32_t size,uint8_t remove) {
 }
 
 // 处理电流数据
-double ProcessCurrentData(uint16_t current_data[], int32_t data_size) {
+uint16_t ProcessCurrentData(uint16_t current_data[], int32_t data_size) {
     // 执行快速排序
     QuickSort(current_data, 0, data_size - 1);
 
-    // 计算需要去除的数据数量
-    int32_t trim_count = (TRIM_PERCENTAGE * data_size) / 100;
-
-    // 去除头尾数据
-    int32_t trimmed_size = data_size - (2 * trim_count);
-    uint16_t trimmed_data[trimmed_size];
-
-    for (int32_t i = trim_count; i < data_size - trim_count; ++i) {
-        trimmed_data[i - trim_count] = current_data[i];
-    }
-
     // 计算去除头尾后的平均值
-    return CalculateAverage(trimmed_data, trimmed_size,5);
+    return CalculateAverage(current_data, data_size-1,5);
 }

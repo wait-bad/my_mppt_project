@@ -16,6 +16,6 @@ uint16_t Median(uint16_t arr[], int32_t size);
 uint16_t CalculateAverage(uint16_t arr[], int32_t size,uint8_t remove);
 
 // 处理电流数据
-double ProcessCurrentData(uint16_t current_data[], int32_t data_size);
+uint16_t ProcessCurrentData(uint16_t current_data[], int32_t data_size);
 
 #endif  // CURRENT_PROCESSING_H
