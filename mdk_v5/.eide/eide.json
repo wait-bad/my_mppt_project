@@ -1,0 +1,164 @@
+{
+  "name": "pwm_output_tmr3",
+  "type": "ARM",
+  "dependenceList": [],
+  "srcDirs": [
+    ".eide/deps"
+  ],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": [
+      {
+        "name": "bsp",
+        "files": [
+          {
+            "path": "../../../../../at32f421_board/at32f421_board.c"
+          }
+        ],
+        "folders": []
+      },
+      {
+        "name": "cmsis",
+        "files": [
+          {
+            "path": "../../../../../../libraries/cmsis/cm4/device_support/startup/mdk/startup_at32f421.s"
+          },
+          {
+            "path": "../../../../../../libraries/cmsis/cm4/device_support/system_at32f421.c"
+          }
+        ],
+        "folders": []
+      },
+      {
+        "name": "firmware",
+        "files": [
+          {
+            "path": "../../../../../../libraries/drivers/src/at32f421_crm.c"
+          },
+          {
+            "path": "../../../../../../libraries/drivers/src/at32f421_gpio.c"
+          },
+          {
+            "path": "../../../../../../libraries/drivers/src/at32f421_misc.c"
+          },
+          {
+            "path": "../../../../../../libraries/drivers/src/at32f421_tmr.c"
+          },
+          {
+            "path": "../../../../../../libraries/drivers/src/at32f421_usart.c"
+          }
+        ],
+        "folders": []
+      },
+      {
+        "name": "readme",
+        "files": [],
+        "folders": []
+      },
+      {
+        "name": "user",
+        "files": [
+          {
+            "path": "../src/at32f421_clock.c"
+          },
+          {
+            "path": "../src/at32f421_int.c"
+          },
+          {
+            "path": "../src/main.c"
+          }
+        ],
+        "folders": []
+      }
+    ]
+  },
+  "outDir": "build",
+  "deviceName": null,
+  "packDir": null,
+  "miscInfo": {
+    "uid": "1a487d719b5a2ae74cc2f1c3c4fd9f8c"
+  },
+  "targets": {
+    "pwm_output_tmr3": {
+      "excludeList": [],
+      "toolchain": "AC6",
+      "compileConfig": {
+        "cpuType": "Cortex-M4",
+        "floatingPointHardware": "none",
+        "useCustomScatterFile": false,
+        "scatterFilePath": "<YOUR_SCATTER_FILE>.sct",
+        "storageLayout": {
+          "RAM": [
+            {
+              "tag": "IRAM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x20000000",
+                "size": "0x5000"
+              },
+              "isChecked": true,
+              "noInit": false
+            }
+          ],
+          "ROM": [
+            {
+              "tag": "IROM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x08000000",
+                "size": "0x10000"
+              },
+              "isChecked": true,
+              "isStartup": true
+            }
+          ]
+        },
+        "options": "null"
+      },
+      "uploader": "OpenOCD",
+      "uploadConfig": {
+        "bin": "",
+        "target": "stm32f1x",
+        "interface": "stlink",
+        "baseAddr": "0x08000000"
+      },
+      "uploadConfigMap": {
+        "JLink": {
+          "bin": "",
+          "baseAddr": "",
+          "cpuInfo": {
+            "vendor": "null",
+            "cpuName": "null"
+          },
+          "proType": 1,
+          "speed": 8000,
+          "otherCmds": ""
+        }
+      },
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "../../../../../../libraries/drivers/inc",
+          "../../../../../../libraries/cmsis/cm4/core_support",
+          "../../../../../../libraries/cmsis/cm4/device_support",
+          "../inc",
+          ".cmsis/include",
+          "RTE/_pwm_output_tmr3",
+          ".eide/deps",
+          "../../../../../at32f421_board",
+          "../../../../../../libraries/drivers/src",
+          "../src/math"
+        ],
+        "libList": [],
+        "sourceDirList": [],
+        "defineList": [
+          "AT32F421C8T7",
+          "USE_STDPERIPH_DRIVER",
+          "AT_START_F421_V1"
+        ]
+      }
+    }
+  },
+  "version": "3.3"
+}
