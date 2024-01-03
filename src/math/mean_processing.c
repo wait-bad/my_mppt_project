@@ -1,6 +1,7 @@
 #include "current_processing.h"
 #include <stdio.h>
 
+
 // 快速排序实现
 void QuickSort(uint16_t arr[], int32_t low, int32_t high) {
     if (low < high) {
@@ -50,14 +51,13 @@ uint16_t Median(uint16_t arr[], int32_t size) {
 }
 
 // 计算平均值
-double CalculateAverage(uint16_t arr[], int32_t size) {
-    double sum = 0;
+uint16_t CalculateAverage(uint16_t arr[], int32_t size,uint8_t remove) {
+    uint32_t sum = 0;
 
-    for (int32_t i = 0; i < size; ++i) {
+    for (int32_t i = remove; i < size-remove; ++i) {
         sum += arr[i];
     }
-
-    return sum / size;
+    return sum/(size-remove);
 }
 
 // 处理电流数据

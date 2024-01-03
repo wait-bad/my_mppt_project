@@ -150,7 +150,9 @@
           "../../../../../../libraries/drivers/src",
           "../src/math"
         ],
-        "libList": [],
+        "libList": [
+          "../src/math"
+        ],
         "sourceDirList": [],
         "defineList": [
           "AT32F421C8T7",

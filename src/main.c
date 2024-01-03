@@ -31,7 +31,6 @@
 #include "at32f421_adc.h"
 #include "at32f421_adc.c"
 #include "mean_processing.h"
-//test
 
 /*************system_value*************/
 
@@ -62,6 +61,8 @@ uint32_t set_duty_max     = 0;
 uint32_t set_duty_min     = 0;
 double really_duty      = 0;
 uint16_t now_current      = 0;
+uint16_t helf_sec_flag   = 0;
+uint16_t current_data[70];
 
 // flag
 uint16_t tim_add_counter = 0;
@@ -78,6 +79,8 @@ static void dma_config(void);
 static void adc_config(void);
 static void adc_gpio_config(void);
 void MPPT_PerturbObserve(void);
+void UpdateControlOptimized();
+void catch_current_data();
 /**************************************/
 
 uint16_t prescaler_value = 0;
@@ -264,17 +267,12 @@ int main(void)
   /***********************/
   while(1)
   {
-    delay_ms(1000);
-    //printf("usart printf counter: %u\r\n",time_cnt++);
-    printf("voltage value = %.3fV\r\n", ad_value[0]*voltage_cailbration);
-    printf("now_current value = %dA\r\n", now_current);
-    printf("mean_current value = %dA\r\n", ad_value[1]);
-    printf("mean_current  = %.3fA\r\n", ad_value[1]*current_cailbration);
-    printf("power   value = %.3fW\r\n", ad_value[0]*voltage_cailbration*ad_value[1]*current_cailbration);
-    printf("reload  value  = %d\r\n", currten_duty/constant);
-    really_duty = (currten_duty/constant);
-    printf("duty____value = %.3f%%\r\n", really_duty/set_Reload_value*100);
-
+    if (helf_sec_flag != 0)
+    {
+      QuickSort(current_data,0,70);
+      
+    }
+    
   }
 
 }
@@ -346,30 +344,8 @@ void TMR3_GLOBAL_IRQHandler(void)
   if(tmr_flag_get(TMR3, TMR_C2_FLAG) != RESET)
   {
     time_cnt++;
-    voltage_duty += set_duty_voltage-ad_value[0];
-    currten_duty += set_duty_currten-ad_value[1];
-    now_current   = ad_value[1];
-
-    if (voltage_duty > set_duty_max)
-    {
-      voltage_duty = set_duty_max;
-    }
-    else if (voltage_duty < set_duty_min)
-    {
-      voltage_duty = set_duty_min;
-    }
-      
-    if (currten_duty >voltage_duty)
-    {
-      currten_duty = voltage_duty;
-    }
-    else if (currten_duty < set_duty_min)
-    {
-      currten_duty = set_duty_min;
-    }
-
-    tmr_channel_value_set(TMR3, TMR_SELECT_CHANNEL_1, currten_duty/constant);
-
+    UpdateControlOptimized();
+    catch_current_data();
     tmr_flag_clear(TMR3, TMR_C2_FLAG);
   }
 
@@ -377,4 +353,37 @@ void TMR3_GLOBAL_IRQHandler(void)
   /* add user code begin TMR3_GLOBAL_IRQ 1 */
 
   /* add user code end TMR3_GLOBAL_IRQ 1 */
+}
+
+// 更新电压和电流环控制（优化版）
+void UpdateControlOptimized() {
+    // 更新电压和电流的差值
+    voltage_duty += set_duty_voltage - ad_value[0];
+    currten_duty += set_duty_currten - ad_value[1];
+
+    // 限幅电压和电流（使用三元运算符替代 if-else 语句）
+    voltage_duty = (voltage_duty > set_duty_max) ? set_duty_max : ((voltage_duty < set_duty_min) ? set_duty_min : voltage_duty);
+    currten_duty = (currten_duty > voltage_duty) ? voltage_duty : ((currten_duty < set_duty_min) ? set_duty_min : currten_duty);
+
+    // 更新定时器通道值（使用位运算替代除法）
+    tmr_channel_value_set(TMR3, TMR_SELECT_CHANNEL_1, currten_duty >> 13);
+}
+
+/**
+ * @brief 检测time_cnt 实现填充current_data数组
+ * 提供半秒标志为
+ * 
+ */
+void catch_current_data()
+{
+    if (time_cnt%10 == 0)
+    {
+      current_data[time_cnt/10] = ad_value[1];
+    }
+    
+    if (time_cnt == 1400)
+    {
+      time_cnt = 0;
+      helf_sec_flag = 1;
+    }
 }
