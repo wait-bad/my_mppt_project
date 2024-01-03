@@ -25,15 +25,13 @@
   */
 
 #include "at32f421_board.h"
-
 #include "at32f421_clock.h"
-
 #include "at32f421_dma.h"
 #include "at32f421_dma.c"
 #include "at32f421_adc.h"
 #include "at32f421_adc.c"
 #include "mean_processing.h"
-
+//test
 
 /*************system_value*************/
 
