@@ -31,6 +31,7 @@
 #include "at32f421_adc.h"
 #include "at32f421_adc.c"
 #include "mean_processing.h"
+#include "mean_processing.c"
 
 /*************system_value*************/
 
@@ -270,7 +271,7 @@ int main(void)
     if (helf_sec_flag != 0)
     {
       QuickSort(current_data,0,70);
-      
+
     }
     
   }

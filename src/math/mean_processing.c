@@ -1,4 +1,4 @@
-#include "current_processing.h"
+#include "mean_processing.h"
 #include <stdio.h>
 
 
@@ -77,5 +77,5 @@ double ProcessCurrentData(uint16_t current_data[], int32_t data_size) {
     }
 
     // 计算去除头尾后的平均值
-    return CalculateAverage(trimmed_data, trimmed_size);
+    return CalculateAverage(trimmed_data, trimmed_size,5);
 }
